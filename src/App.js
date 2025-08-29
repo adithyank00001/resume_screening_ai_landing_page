@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function App() {
   const [showEmailModal, setShowEmailModal] = useState(false);
@@ -12,6 +12,36 @@ function App() {
     painLevel: '',
     frustration: ''
   });
+
+  // Video player functionality
+  useEffect(() => {
+    const video = document.getElementById('resume-screener-video');
+    const overlay = document.getElementById('play-button-overlay');
+    
+    if (video && overlay) {
+      const handleVideoEnd = () => {
+        overlay.style.display = 'flex';
+      };
+      
+      const handleVideoPlay = () => {
+        overlay.style.display = 'none';
+      };
+      
+      const handleVideoPause = () => {
+        overlay.style.display = 'flex';
+      };
+      
+      video.addEventListener('ended', handleVideoEnd);
+      video.addEventListener('play', handleVideoPlay);
+      video.addEventListener('pause', handleVideoPause);
+      
+      return () => {
+        video.removeEventListener('ended', handleVideoEnd);
+        video.removeEventListener('play', handleVideoPlay);
+        video.removeEventListener('pause', handleVideoPause);
+      };
+    }
+  }, []);
 
   const questions = [
     {
@@ -318,6 +348,8 @@ function App() {
               Still Screening Resumes 
               <span className="block text-red-600">by Hand?</span>
             </h2>
+            
+            
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -354,13 +386,66 @@ function App() {
             </div>
           </div>
           
-          <p className="text-center mt-16 text-xl font-semibold text-gray-800 bg-white px-8 py-4 rounded-lg shadow-sm border border-gray-200 max-w-2xl mx-auto">
-            You don't have time to waste 
-          </p>
-        </div>
-      </section>
+                     <p className="text-center mt-16 text-xl font-semibold text-gray-800 bg-white px-8 py-4 rounded-lg shadow-sm border border-gray-200 max-w-2xl mx-auto">
+             You don't have time to waste 
+           </p>
+         </div>
+       </section>
 
-      {/* Solution Section */}
+       {/* Video Demo Section */}
+       <section className="py-24 px-6 bg-white">
+         <div className="max-w-6xl mx-auto text-center">
+           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+             See How It Works — In Under 20 Seconds
+           </h2>
+           <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
+             A quick demo of AI-powered resume screening.
+           </p>
+           
+           {/* Video Player */}
+           <div className="w-full max-w-6xl mx-auto">
+             <div className="relative bg-gray-900 rounded-lg overflow-hidden shadow-2xl">
+               <video
+                 id="resume-screener-video"
+                 className="w-full h-auto aspect-video object-cover"
+                 preload="metadata"
+                 poster="/Screenshot 2025-08-29 172452.png"
+                 controls={false}
+               >
+                 <source src="https://res.cloudinary.com/glide/video/upload/v1/glideapps.com/agents/Resume%20Screener%20%E2%80%94%20High%20Res%20%E2%80%94%20High%20Compression.webm?_a=DATAiZAAZAA0" type="video/webm" />
+                 Your browser does not support the video tag.
+               </video>
+               
+               {/* Custom Play Button Overlay */}
+               <div 
+                 id="play-button-overlay"
+                 className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 cursor-pointer transition-all duration-300 hover:bg-opacity-20"
+                 onClick={() => {
+                   const video = document.getElementById('resume-screener-video');
+                   const overlay = document.getElementById('play-button-overlay');
+                   
+                   if (video.paused) {
+                     video.play();
+                   } else {
+                     video.pause();
+                   }
+                 }}
+               >
+                 <div 
+                   id="play-button"
+                   className="w-20 h-20 bg-white bg-opacity-90 rounded-full flex items-center justify-center shadow-lg hover:bg-opacity-100 transition-all duration-200 hover:scale-110"
+                 >
+                   <svg className="w-8 h-8 text-gray-900 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                     <path d="M8 5v14l11-7z"/>
+                   </svg>
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
+       </section>
+
+       {/* Solution Section */}
       <section className="py-24 px-6 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
