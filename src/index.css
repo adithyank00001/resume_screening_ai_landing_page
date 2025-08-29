@@ -5,3 +5,29 @@
 body {
   font-family: 'Poppins', sans-serif;
 }
+
+/* Mobile video fixes */
+.mobile-video-fix {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-perspective: 1000;
+  perspective: 1000;
+}
+
+/* iOS Safari specific video fixes */
+@supports (-webkit-touch-callout: none) {
+  .mobile-video-fix {
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Android Chrome specific video fixes */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  .mobile-video-fix {
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+}

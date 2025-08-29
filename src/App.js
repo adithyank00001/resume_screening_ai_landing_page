@@ -19,26 +19,68 @@ function App() {
     const overlay = document.getElementById('play-button-overlay');
     
     if (video && overlay) {
+      // Mobile-specific video setup
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      if (isMobile) {
+        // For mobile, ensure video is muted and ready to play
+        video.muted = true;
+        video.playsInline = true;
+        
+        // Set video attributes for mobile compatibility
+        video.setAttribute('webkit-playsinline', 'true');
+        video.setAttribute('x5-playsinline', 'true');
+        video.setAttribute('x5-video-player-type', 'h5');
+        video.setAttribute('x5-video-player-fullscreen', 'false');
+        
+        // Load video metadata
+        video.load();
+        
+        // Preload video for better mobile performance
+        video.preload = 'metadata';
+      }
+      
       const handleVideoEnd = () => {
         overlay.style.display = 'flex';
       };
       
       const handleVideoPlay = () => {
         overlay.style.display = 'none';
+        console.log('Video started playing successfully');
+      };
+      
+      const handleVideoLoadedData = () => {
+        console.log('Video data loaded successfully');
       };
       
       const handleVideoPause = () => {
         overlay.style.display = 'flex';
       };
       
+      const handleVideoError = (e) => {
+        console.error('Video error:', e);
+        console.log('Video error details:', {
+          error: video.error,
+          networkState: video.networkState,
+          readyState: video.readyState,
+          src: video.currentSrc
+        });
+        // Show fallback message or image
+        overlay.innerHTML = '<div class="text-white text-center"><p>Video unavailable on this device</p><p class="text-sm">Please try on desktop</p></div>';
+      };
+      
       video.addEventListener('ended', handleVideoEnd);
       video.addEventListener('play', handleVideoPlay);
       video.addEventListener('pause', handleVideoPause);
+      video.addEventListener('error', handleVideoError);
+      video.addEventListener('loadeddata', handleVideoLoadedData);
       
       return () => {
         video.removeEventListener('ended', handleVideoEnd);
         video.removeEventListener('play', handleVideoPlay);
         video.removeEventListener('pause', handleVideoPause);
+        video.removeEventListener('error', handleVideoError);
+        video.removeEventListener('loadeddata', handleVideoLoadedData);
       };
     }
   }, []);
@@ -407,12 +449,20 @@ function App() {
              <div className="relative bg-gray-900 rounded-lg overflow-hidden shadow-2xl">
                <video
                  id="resume-screener-video"
-                 className="w-full h-auto aspect-video object-cover"
+                 className="w-full h-auto aspect-video object-cover mobile-video-fix"
                  preload="metadata"
                  poster="/Screenshot 2025-08-29 172452.png"
                  controls={false}
+                 muted
+                 playsInline
+                 webkit-playsinline="true"
+                 x5-playsinline="true"
+                 x5-video-player-type="h5"
+                 x5-video-player-fullscreen="false"
                >
                  <source src="https://res.cloudinary.com/glide/video/upload/v1/glideapps.com/agents/Resume%20Screener%20%E2%80%94%20High%20Res%20%E2%80%94%20High%20Compression.webm?_a=DATAiZAAZAA0" type="video/webm" />
+                 <source src="https://res.cloudinary.com/glide/video/upload/v1/glideapps.com/agents/Resume%20Screener%20%E2%80%94%20High%20Res%20%E2%80%94%20High%20Compression.mp4?_a=DATAiZAAZAA0" type="video/mp4" />
+                 <source src="https://res.cloudinary.com/glide/video/upload/v1/glideapps.com/agents/Resume%20Screener%20%E2%80%94%20High%20Res%20%E2%80%94%20High%20Compression.mov?_a=DATAiZAAZAA0" type="video/quicktime" />
                  Your browser does not support the video tag.
                </video>
                
@@ -420,14 +470,22 @@ function App() {
                <div 
                  id="play-button-overlay"
                  className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 cursor-pointer transition-all duration-300 hover:bg-opacity-20"
-                 onClick={() => {
+                 onClick={async () => {
                    const video = document.getElementById('resume-screener-video');
                    const overlay = document.getElementById('play-button-overlay');
                    
-                   if (video.paused) {
-                     video.play();
-                   } else {
-                     video.pause();
+                   try {
+                     if (video.paused) {
+                       // For mobile, ensure video is muted before playing
+                       video.muted = true;
+                       await video.play();
+                     } else {
+                       video.pause();
+                     }
+                   } catch (error) {
+                     console.error('Video play error:', error);
+                     // Show fallback for mobile devices that can't play video
+                     overlay.innerHTML = '<div class="text-white text-center"><p>Video unavailable on this device</p><p class="text-sm">Please try on desktop</p></div>';
                    }
                  }}
                >
