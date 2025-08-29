@@ -460,9 +460,7 @@ function App() {
                  x5-video-player-type="h5"
                  x5-video-player-fullscreen="false"
                >
-                 <source src="https://res.cloudinary.com/glide/video/upload/v1/glideapps.com/agents/Resume%20Screener%20%E2%80%94%20High%20Res%20%E2%80%94%20High%20Compression.webm?_a=DATAiZAAZAA0" type="video/webm" />
-                 <source src="https://res.cloudinary.com/glide/video/upload/v1/glideapps.com/agents/Resume%20Screener%20%E2%80%94%20High%20Res%20%E2%80%94%20High%20Compression.mp4?_a=DATAiZAAZAA0" type="video/mp4" />
-                 <source src="https://res.cloudinary.com/glide/video/upload/v1/glideapps.com/agents/Resume%20Screener%20%E2%80%94%20High%20Res%20%E2%80%94%20High%20Compression.mov?_a=DATAiZAAZAA0" type="video/quicktime" />
+                 <source src="/video/Resume Screener — Low Res — High Compression.webm" type="video/webm" />
                  Your browser does not support the video tag.
                </video>
                
