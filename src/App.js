@@ -12,6 +12,68 @@ function App() {
     painLevel: '',
     frustration: ''
   });
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      setIsMobile(mobile);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Fullscreen functionality
+  const toggleFullscreen = () => {
+    const video = document.getElementById('resume-screener-video');
+    const videoContainer = video?.parentElement;
+    
+    if (!video || !videoContainer) return;
+    
+    try {
+      if (!isFullscreen) {
+        if (videoContainer.requestFullscreen) {
+          videoContainer.requestFullscreen();
+        } else if (videoContainer.webkitRequestFullscreen) {
+          videoContainer.webkitRequestFullscreen();
+        } else if (videoContainer.msRequestFullscreen) {
+          videoContainer.msRequestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+      }
+    } catch (error) {
+      console.error('Fullscreen error:', error);
+    }
+  };
+
+  // Listen for fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement || !!document.webkitFullscreenElement || !!document.msFullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('msfullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   // Video player functionality
   useEffect(() => {
@@ -463,6 +525,25 @@ function App() {
                  <source src="/video/Resume Screener — Low Res — High Compression.webm" type="video/webm" />
                  Your browser does not support the video tag.
                </video>
+               
+               {/* Fullscreen Button - Mobile Only */}
+               {isMobile && (
+                 <button
+                   onClick={toggleFullscreen}
+                   className="absolute top-4 right-4 z-10 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-2 rounded-lg transition-all duration-200"
+                   title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+                 >
+                   {isFullscreen ? (
+                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                       <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
+                     </svg>
+                   ) : (
+                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                       <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                     </svg>
+                   )}
+                 </button>
+               )}
                
                {/* Custom Play Button Overlay */}
                <div 
