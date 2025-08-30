@@ -642,58 +642,6 @@ function App() {
         </div>
       </section>
 
-      {/* Problem Section */}
-      <section className="py-24 px-6 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Still Screening Resumes 
-              <span className="block text-red-600">by Hand?</span>
-            </h2>
-            
-            
-          </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="bg-white p-8 rounded-lg shadow-md border-2 border-gray-200 hover:shadow-lg transition-shadow duration-200">
-              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-6">
-                <span className="text-2xl">⏰</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Hours Wasted</h3>
-              <p className="text-gray-600 leading-relaxed">Reading irrelevant applications that don't match your requirements</p>
-            </div>
-            
-            <div className="bg-white p-8 rounded-lg shadow-md border-2 border-gray-200 hover:shadow-lg transition-shadow duration-200">
-              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-6">
-                <span className="text-2xl">👥</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Top Talent Buried</h3>
-              <p className="text-gray-600 leading-relaxed">Great candidates hidden under piles of unqualified applications</p>
-            </div>
-            
-            <div className="bg-white p-8 rounded-lg shadow-md border-2 border-gray-200 hover:shadow-lg transition-shadow duration-200">
-              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-6">
-                <span className="text-2xl">❌</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Manual Filtering</h3>
-              <p className="text-gray-600 leading-relaxed">Human error leads to missed matches and overlooked talent</p>
-            </div>
-            
-            <div className="bg-white p-8 rounded-lg shadow-md border-2 border-gray-200 hover:shadow-lg transition-shadow duration-200">
-              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-6">
-                <span className="text-2xl">💰</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Bloated Tools</h3>
-              <p className="text-gray-600 leading-relaxed">Most HR tools are overpriced and packed with unnecessary features</p>
-            </div>
-          </div>
-          
-                     <p className="text-center mt-16 text-xl font-semibold text-gray-800 bg-white px-8 py-4 rounded-lg shadow-sm border border-gray-200 max-w-2xl mx-auto">
-             You don't have time to waste 
-           </p>
-         </div>
-       </section>
-
        {/* Video Demo Section */}
        <section className="py-24 px-6 bg-white">
          <div className="max-w-6xl mx-auto text-center">
@@ -783,6 +731,58 @@ function App() {
                </div>
              </div>
            </div>
+         </div>
+       </section>
+
+      {/* Problem Section */}
+      <section className="py-24 px-6 bg-gray-50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Still Screening Resumes 
+              <span className="block text-red-600">by Hand?</span>
+            </h2>
+            
+            
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="bg-white p-8 rounded-lg shadow-md border-2 border-gray-200 hover:shadow-lg transition-shadow duration-200">
+              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-6">
+                <span className="text-2xl">⏰</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Hours Wasted</h3>
+              <p className="text-gray-600 leading-relaxed">Reading irrelevant applications that don't match your requirements</p>
+            </div>
+            
+            <div className="bg-white p-8 rounded-lg shadow-md border-2 border-gray-200 hover:shadow-lg transition-shadow duration-200">
+              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-6">
+                <span className="text-2xl">👥</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Top Talent Buried</h3>
+              <p className="text-gray-600 leading-relaxed">Great candidates hidden under piles of unqualified applications</p>
+            </div>
+            
+            <div className="bg-white p-8 rounded-lg shadow-md border-2 border-gray-200 hover:shadow-lg transition-shadow duration-200">
+              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-6">
+                <span className="text-2xl">❌</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Manual Filtering</h3>
+              <p className="text-gray-600 leading-relaxed">Human error leads to missed matches and overlooked talent</p>
+            </div>
+            
+            <div className="bg-white p-8 rounded-lg shadow-md border-2 border-gray-200 hover:shadow-lg transition-shadow duration-200">
+              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-6">
+                <span className="text-2xl">💰</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Bloated Tools</h3>
+              <p className="text-gray-600 leading-relaxed">Most HR tools are overpriced and packed with unnecessary features</p>
+            </div>
+          </div>
+          
+                     <p className="text-center mt-16 text-xl font-semibold text-gray-800 bg-white px-8 py-4 rounded-lg shadow-sm border border-gray-200 max-w-2xl mx-auto">
+             You don't have time to waste 
+           </p>
          </div>
        </section>
 
