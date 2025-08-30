@@ -38,6 +38,14 @@ function App() {
     
     try {
       if (!isFullscreen) {
+        // Store current scroll position and video position before entering fullscreen
+        const scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+        const videoRect = videoContainer.getBoundingClientRect();
+        
+        // Store data in sessionStorage for restoration
+        sessionStorage.setItem('preFullscreenScrollPosition', scrollPosition.toString());
+        sessionStorage.setItem('preFullscreenVideoTop', videoRect.top.toString());
+        
         // For mobile devices, automatically rotate to landscape and enter fullscreen
         if (isMobile) {
           // First, try to lock orientation to landscape
@@ -190,6 +198,52 @@ function App() {
           setIsLandscape(false);
           console.log('Reset all styling on fullscreen exit');
         }
+        
+        // Restore scroll position with multiple attempts for better reliability
+        const restoreScrollPosition = () => {
+          const savedScrollPosition = sessionStorage.getItem('preFullscreenScrollPosition');
+          const savedVideoTop = sessionStorage.getItem('preFullscreenVideoTop');
+          
+          if (savedScrollPosition) {
+            const scrollPosition = parseInt(savedScrollPosition, 10);
+            
+            // Method 1: Direct scroll to position
+            window.scrollTo({
+              top: scrollPosition,
+              behavior: 'instant'
+            });
+            
+            // Method 2: If video position was saved, scroll to make video visible
+            if (savedVideoTop) {
+              const videoTop = parseInt(savedVideoTop, 10);
+              const currentVideoRect = videoContainer?.getBoundingClientRect();
+              
+              if (currentVideoRect && currentVideoRect.top < 0) {
+                // Video is above viewport, scroll to bring it into view
+                const newScrollPosition = scrollPosition + currentVideoRect.top - 20; // 20px offset
+                window.scrollTo({
+                  top: newScrollPosition,
+                  behavior: 'instant'
+                });
+              }
+            }
+            
+            // Clean up stored data
+            sessionStorage.removeItem('preFullscreenScrollPosition');
+            sessionStorage.removeItem('preFullscreenVideoTop');
+            
+            console.log('Restored scroll position to:', scrollPosition);
+          }
+        };
+        
+        // Try to restore scroll position multiple times with delays
+        // This handles cases where the DOM takes time to update
+        restoreScrollPosition();
+        
+        // Additional attempts with delays
+        setTimeout(restoreScrollPosition, 50);
+        setTimeout(restoreScrollPosition, 200);
+        setTimeout(restoreScrollPosition, 500);
       }
       
       // If we just entered fullscreen on mobile, ensure proper orientation
