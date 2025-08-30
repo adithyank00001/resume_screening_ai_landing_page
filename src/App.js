@@ -29,7 +29,7 @@ function App() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Fullscreen functionality with screen rotation
+  // Enhanced fullscreen functionality with automatic screen rotation
   const toggleFullscreen = async () => {
     const video = document.getElementById('resume-screener-video');
     const videoContainer = video?.parentElement;
@@ -38,16 +38,20 @@ function App() {
     
     try {
       if (!isFullscreen) {
-        // Try to rotate to landscape before entering fullscreen
+        // For mobile devices, automatically rotate to landscape and enter fullscreen
         if (isMobile) {
+          // First, try to lock orientation to landscape
           if (window.screen.orientation && window.screen.orientation.lock) {
             try {
               await window.screen.orientation.lock('landscape');
               setIsLandscape(true);
-              console.log('Screen rotated to landscape using API');
+              console.log('Screen automatically rotated to landscape');
+              
+              // Small delay to ensure orientation change is applied
+              await new Promise(resolve => setTimeout(resolve, 500));
             } catch (orientationError) {
               console.log('Could not lock orientation with API:', orientationError);
-              // Fallback: Apply CSS rotation
+              // Fallback: Apply CSS rotation for immediate visual feedback
               videoContainer.style.transform = 'rotate(90deg)';
               videoContainer.style.width = '100vh';
               videoContainer.style.height = '100vw';
@@ -70,6 +74,9 @@ function App() {
             setIsLandscape(true);
             console.log('Applied CSS rotation (no API support)');
           }
+          
+          // Small delay to ensure rotation is applied before fullscreen
+          await new Promise(resolve => setTimeout(resolve, 300));
         }
         
         // Enter fullscreen
@@ -79,6 +86,19 @@ function App() {
           await videoContainer.webkitRequestFullscreen();
         } else if (videoContainer.msRequestFullscreen) {
           await videoContainer.msRequestFullscreen();
+        }
+        
+        // If we're on mobile and couldn't enter fullscreen, ensure video fills the screen
+        if (isMobile && !document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+          // Apply fullscreen-like styling
+          videoContainer.style.position = 'fixed';
+          videoContainer.style.top = '0';
+          videoContainer.style.left = '0';
+          videoContainer.style.width = '100vw';
+          videoContainer.style.height = '100vh';
+          videoContainer.style.zIndex = '9999';
+          videoContainer.style.backgroundColor = 'black';
+          console.log('Applied mobile fullscreen fallback');
         }
       } else {
         // Exit fullscreen
@@ -101,7 +121,7 @@ function App() {
             }
           }
           
-          // Reset CSS rotation
+          // Reset CSS rotation and fullscreen styling
           if (isLandscape) {
             videoContainer.style.transform = '';
             videoContainer.style.width = '';
@@ -110,17 +130,32 @@ function App() {
             videoContainer.style.top = '';
             videoContainer.style.left = '';
             videoContainer.style.zIndex = '';
+            videoContainer.style.backgroundColor = '';
             setIsLandscape(false);
-            console.log('Reset CSS rotation');
+            console.log('Reset CSS rotation and fullscreen styling');
           }
         }
       }
     } catch (error) {
       console.error('Fullscreen error:', error);
+      // If fullscreen fails, still try to apply mobile-friendly styling
+      if (isMobile && !isFullscreen) {
+        const videoContainer = document.getElementById('resume-screener-video')?.parentElement;
+        if (videoContainer) {
+          videoContainer.style.position = 'fixed';
+          videoContainer.style.top = '0';
+          videoContainer.style.left = '0';
+          videoContainer.style.width = '100vw';
+          videoContainer.style.height = '100vh';
+          videoContainer.style.zIndex = '9999';
+          videoContainer.style.backgroundColor = 'black';
+          console.log('Applied error fallback styling');
+        }
+      }
     }
   };
 
-  // Listen for fullscreen changes
+  // Listen for fullscreen changes and handle automatic rotation
   useEffect(() => {
     const handleFullscreenChange = () => {
       const wasFullscreen = isFullscreen;
@@ -128,8 +163,9 @@ function App() {
       
       setIsFullscreen(isNowFullscreen);
       
-      // If we just exited fullscreen and we're on mobile, try to unlock orientation
+      // If we just exited fullscreen and we're on mobile, reset everything
       if (wasFullscreen && !isNowFullscreen && isMobile) {
+        // Try to unlock orientation
         if (window.screen.orientation && window.screen.orientation.unlock) {
           try {
             window.screen.orientation.unlock();
@@ -139,21 +175,35 @@ function App() {
           }
         }
         
-        // Reset CSS rotation if it was applied
-        if (isLandscape) {
-          const video = document.getElementById('resume-screener-video');
-          const videoContainer = video?.parentElement;
-          if (videoContainer) {
-            videoContainer.style.transform = '';
-            videoContainer.style.width = '';
-            videoContainer.style.height = '';
-            videoContainer.style.position = '';
-            videoContainer.style.top = '';
-            videoContainer.style.left = '';
-            videoContainer.style.zIndex = '';
-            setIsLandscape(false);
-            console.log('Reset CSS rotation on fullscreen exit');
-          }
+        // Reset all CSS styling
+        const video = document.getElementById('resume-screener-video');
+        const videoContainer = video?.parentElement;
+        if (videoContainer) {
+          videoContainer.style.transform = '';
+          videoContainer.style.width = '';
+          videoContainer.style.height = '';
+          videoContainer.style.position = '';
+          videoContainer.style.top = '';
+          videoContainer.style.left = '';
+          videoContainer.style.zIndex = '';
+          videoContainer.style.backgroundColor = '';
+          setIsLandscape(false);
+          console.log('Reset all styling on fullscreen exit');
+        }
+      }
+      
+      // If we just entered fullscreen on mobile, ensure proper orientation
+      if (!wasFullscreen && isNowFullscreen && isMobile) {
+        // Double-check orientation is locked to landscape
+        if (window.screen.orientation && window.screen.orientation.lock) {
+          setTimeout(async () => {
+            try {
+              await window.screen.orientation.lock('landscape');
+              console.log('Orientation locked to landscape after fullscreen entry');
+            } catch (error) {
+              console.log('Could not lock orientation after fullscreen entry:', error);
+            }
+          }, 100);
         }
       }
     };
@@ -624,17 +674,23 @@ function App() {
                {isMobile && (
                  <button
                    onClick={toggleFullscreen}
-                   className="absolute top-4 right-4 z-10 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-2 rounded-lg transition-all duration-200"
-                   title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+                   className="absolute top-4 right-4 z-10 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-3 rounded-lg transition-all duration-200 flex items-center space-x-2"
+                   title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen & Rotate"}
                  >
                    {isFullscreen ? (
-                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                       <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
-                     </svg>
+                     <>
+                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                         <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
+                       </svg>
+                       <span className="text-xs font-medium">Exit</span>
+                     </>
                    ) : (
-                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                       <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
-                     </svg>
+                     <>
+                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                         <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                       </svg>
+                       <span className="text-xs font-medium">Full</span>
+                     </>
                    )}
                  </button>
                )}
