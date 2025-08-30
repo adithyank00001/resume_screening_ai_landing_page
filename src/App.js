@@ -14,6 +14,7 @@ function App() {
   });
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isLandscape, setIsLandscape] = useState(false);
 
   // Check if device is mobile
   useEffect(() => {
@@ -28,8 +29,8 @@ function App() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Fullscreen functionality
-  const toggleFullscreen = () => {
+  // Fullscreen functionality with screen rotation
+  const toggleFullscreen = async () => {
     const video = document.getElementById('resume-screener-video');
     const videoContainer = video?.parentElement;
     
@@ -37,20 +38,81 @@ function App() {
     
     try {
       if (!isFullscreen) {
+        // Try to rotate to landscape before entering fullscreen
+        if (isMobile) {
+          if (window.screen.orientation && window.screen.orientation.lock) {
+            try {
+              await window.screen.orientation.lock('landscape');
+              setIsLandscape(true);
+              console.log('Screen rotated to landscape using API');
+            } catch (orientationError) {
+              console.log('Could not lock orientation with API:', orientationError);
+              // Fallback: Apply CSS rotation
+              videoContainer.style.transform = 'rotate(90deg)';
+              videoContainer.style.width = '100vh';
+              videoContainer.style.height = '100vw';
+              videoContainer.style.position = 'fixed';
+              videoContainer.style.top = '0';
+              videoContainer.style.left = '0';
+              videoContainer.style.zIndex = '9999';
+              setIsLandscape(true);
+              console.log('Applied CSS rotation fallback');
+            }
+          } else {
+            // No Screen Orientation API support, use CSS rotation
+            videoContainer.style.transform = 'rotate(90deg)';
+            videoContainer.style.width = '100vh';
+            videoContainer.style.height = '100vw';
+            videoContainer.style.position = 'fixed';
+            videoContainer.style.top = '0';
+            videoContainer.style.left = '0';
+            videoContainer.style.zIndex = '9999';
+            setIsLandscape(true);
+            console.log('Applied CSS rotation (no API support)');
+          }
+        }
+        
+        // Enter fullscreen
         if (videoContainer.requestFullscreen) {
-          videoContainer.requestFullscreen();
+          await videoContainer.requestFullscreen();
         } else if (videoContainer.webkitRequestFullscreen) {
-          videoContainer.webkitRequestFullscreen();
+          await videoContainer.webkitRequestFullscreen();
         } else if (videoContainer.msRequestFullscreen) {
-          videoContainer.msRequestFullscreen();
+          await videoContainer.msRequestFullscreen();
         }
       } else {
+        // Exit fullscreen
         if (document.exitFullscreen) {
-          document.exitFullscreen();
+          await document.exitFullscreen();
         } else if (document.webkitExitFullscreen) {
-          document.webkitExitFullscreen();
+          await document.webkitExitFullscreen();
         } else if (document.msExitFullscreen) {
-          document.msExitFullscreen();
+          await document.msExitFullscreen();
+        }
+        
+        // Reset orientation and CSS
+        if (isMobile) {
+          if (window.screen.orientation && window.screen.orientation.unlock) {
+            try {
+              window.screen.orientation.unlock();
+              console.log('Screen orientation unlocked');
+            } catch (orientationError) {
+              console.log('Could not unlock orientation:', orientationError);
+            }
+          }
+          
+          // Reset CSS rotation
+          if (isLandscape) {
+            videoContainer.style.transform = '';
+            videoContainer.style.width = '';
+            videoContainer.style.height = '';
+            videoContainer.style.position = '';
+            videoContainer.style.top = '';
+            videoContainer.style.left = '';
+            videoContainer.style.zIndex = '';
+            setIsLandscape(false);
+            console.log('Reset CSS rotation');
+          }
         }
       }
     } catch (error) {
@@ -61,7 +123,39 @@ function App() {
   // Listen for fullscreen changes
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement || !!document.webkitFullscreenElement || !!document.msFullscreenElement);
+      const wasFullscreen = isFullscreen;
+      const isNowFullscreen = !!document.fullscreenElement || !!document.webkitFullscreenElement || !!document.msFullscreenElement;
+      
+      setIsFullscreen(isNowFullscreen);
+      
+      // If we just exited fullscreen and we're on mobile, try to unlock orientation
+      if (wasFullscreen && !isNowFullscreen && isMobile) {
+        if (window.screen.orientation && window.screen.orientation.unlock) {
+          try {
+            window.screen.orientation.unlock();
+            console.log('Screen orientation unlocked on fullscreen exit');
+          } catch (orientationError) {
+            console.log('Could not unlock orientation on fullscreen exit:', orientationError);
+          }
+        }
+        
+        // Reset CSS rotation if it was applied
+        if (isLandscape) {
+          const video = document.getElementById('resume-screener-video');
+          const videoContainer = video?.parentElement;
+          if (videoContainer) {
+            videoContainer.style.transform = '';
+            videoContainer.style.width = '';
+            videoContainer.style.height = '';
+            videoContainer.style.position = '';
+            videoContainer.style.top = '';
+            videoContainer.style.left = '';
+            videoContainer.style.zIndex = '';
+            setIsLandscape(false);
+            console.log('Reset CSS rotation on fullscreen exit');
+          }
+        }
+      }
     };
 
     document.addEventListener('fullscreenchange', handleFullscreenChange);
@@ -73,7 +167,7 @@ function App() {
       document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
       document.removeEventListener('msfullscreenchange', handleFullscreenChange);
     };
-  }, []);
+  }, [isFullscreen, isMobile, isLandscape]);
 
   // Video player functionality
   useEffect(() => {
