@@ -627,7 +627,7 @@ function App() {
             </button>
             <div className="flex items-center space-x-3 text-base font-medium text-gray-700 bg-green-50 px-4 py-2 rounded-lg border border-green-200">
               <span className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
-              <span>20+ recruiters already joined</span>
+              <span>30+ recruiters already joined</span>
             </div>
                          <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg px-6 py-4 text-center">
                <div className="flex items-center justify-center space-x-2 mb-1">
@@ -636,7 +636,7 @@ function App() {
                </div>
                <p className="text-purple-700 font-medium">Get 50% Off Your First 3 Months</p>
                <p className="text-sm text-purple-600 mt-1">As a thank-you for helping shape the product.</p>
-               <p className="text-sm text-red-600 mt-2 font-bold bg-red-50 px-3 py-1 rounded-full inline-block border border-red-200">Limited to the first 50 signups</p>
+               <p className="text-sm text-red-600 mt-2 font-bold bg-red-50 px-3 py-1 rounded-full inline-block border border-red-200">Limited to the first 100 signups</p>
              </div>
           </div>
         </div>
