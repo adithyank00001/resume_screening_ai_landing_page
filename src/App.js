@@ -1051,23 +1051,21 @@ function App() {
             </div>
           </div>
           
-                     <div className="text-center mt-16 bg-blue-600 p-12 rounded-lg">
-             <h3 className="text-2xl font-bold text-white mb-2">Already trusted by 20+ recruiters and hiring teams</h3>
-           </div>
+                     <div className="mt-16"></div>
            
-           <div className="mt-12 bg-white p-8 rounded-lg shadow-lg border border-gray-200 max-w-2xl mx-auto">
-             <div className="flex items-center justify-center mb-4">
-               <span className="text-2xl">⭐</span>
-               <span className="text-2xl">⭐</span>
-               <span className="text-2xl">⭐</span>
-               <span className="text-2xl">⭐</span>
-               <span className="text-2xl">⭐</span>
-             </div>
-             <blockquote className="text-lg text-gray-700 italic mb-4">
-               "'This is a game-changer. The accuracy was spot-on and it saved our team hours each week"
-             </blockquote>
-             <p className="text-sm text-gray-500 font-medium">– Startup recruiter from closed beta</p>
-           </div>
+                       <div className="mt-12 bg-gray-900 text-white p-8 rounded-lg shadow-lg border border-gray-700 max-w-2xl mx-auto">
+              <div className="flex items-center justify-center mb-4">
+                <span className="text-2xl">⭐</span>
+                <span className="text-2xl">⭐</span>
+                <span className="text-2xl">⭐</span>
+                <span className="text-2xl">⭐</span>
+                <span className="text-2xl">⭐</span>
+              </div>
+              <blockquote className="text-lg text-gray-200 italic mb-4">
+                "'This is a game-changer. The accuracy was spot-on and it saved our team hours each week"
+              </blockquote>
+              <p className="text-sm text-gray-400 font-medium">– Startup recruiter from closed beta</p>
+            </div>
          </div>
        </section>
 
