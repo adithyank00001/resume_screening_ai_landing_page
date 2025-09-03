@@ -728,9 +728,11 @@ function App() {
       {/* Hero Section */}
       <section className="relative py-32 px-6">
         <div className="max-w-6xl mx-auto text-center">
-          <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-8 leading-tight">
-            Stop Wasting Hours 
-            <span className="block text-blue-600">Screening Resumes</span>
+          <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-tight">
+            Find Your Top Candidates in{' '}
+            <span className="text-blue-600">
+              Minutes, Not Days
+            </span>
           </h1>
           
           <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-4xl mx-auto leading-relaxed">
@@ -1062,7 +1064,7 @@ function App() {
                <span className="text-2xl">⭐</span>
              </div>
              <blockquote className="text-lg text-gray-700 italic mb-4">
-               "This saved me hours. The rankings were surprisingly accurate."
+               "'This is a game-changer. The accuracy was spot-on and it saved our team hours each week"
              </blockquote>
              <p className="text-sm text-gray-500 font-medium">– Startup recruiter from closed beta</p>
            </div>
@@ -1089,9 +1091,7 @@ function App() {
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12 text-center border-t border-gray-800">
-        <div className="max-w-4xl mx-auto">
-          <p className="text-gray-400">&copy; 2024 AI Resume Screening. All rights reserved.</p>
-        </div>
+
       </footer>
     </div>
   );
