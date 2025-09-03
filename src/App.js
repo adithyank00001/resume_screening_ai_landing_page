@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { config } from './config.js';
 
 function App() {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showQuestionnaireModal, setShowQuestionnaireModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showThankYouMessage, setShowThankYouMessage] = useState(false);
   const [email, setEmail] = useState('');
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({
@@ -15,6 +17,7 @@ function App() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isLandscape, setIsLandscape] = useState(false);
+  const [showLoadingMessage, setShowLoadingMessage] = useState(false);
 
   // Check if device is mobile
   useEffect(() => {
@@ -367,11 +370,67 @@ function App() {
     setShowEmailModal(true);
   };
 
-  const handleEmailSubmit = (e) => {
+  const handleEmailSubmit = async (e) => {
     e.preventDefault();
     if (email.trim()) {
-      setShowEmailModal(false);
-      setShowQuestionnaireModal(true);
+      try {
+        // Show loading state immediately
+        setShowEmailModal(false);
+        setShowLoadingMessage(true);
+        
+        // Add timeout to prevent hanging
+        const timeoutId = setTimeout(() => {
+          setShowLoadingMessage(false);
+          setShowEmailModal(true);
+          alert('Request timed out. Please try again.');
+        }, 15000); // 15 second timeout
+        
+        // Prepare the data
+        const formData = new URLSearchParams();
+        formData.append('email', email);
+        formData.append('resumesPerRole', '');
+        formData.append('jobRolesPerMonth', '');
+        formData.append('painLevel', '');
+        formData.append('frustration', '');
+
+        // Wait for the save to complete
+        const response = await fetch(config.GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: formData
+        });
+
+        // Clear timeout since we got a response
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Email saved successfully:', result);
+          
+          // Only show success after confirming data was saved
+          setShowLoadingMessage(false);
+          setShowThankYouMessage(true);
+          
+          // Show questionnaire after thank you message
+          setTimeout(() => {
+            setShowThankYouMessage(false);
+            setShowQuestionnaireModal(true);
+          }, 1500);
+        } else {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+      } catch (error) {
+        console.error('Error saving email:', error);
+        
+        // Show error state and allow retry
+        setShowLoadingMessage(false);
+        setShowEmailModal(true);
+        
+        // You could add a toast notification here for better UX
+        alert('Failed to save your email. Please try again.');
+      }
     }
   };
 
@@ -410,22 +469,18 @@ function App() {
       frustration: answers.frustration
     };
 
-    // Close modal immediately for better UX
-    setShowQuestionnaireModal(false);
-    setCurrentQuestion(0);
-    setAnswers({
-      resumesPerRole: '',
-      jobRolesPerMonth: '',
-      painLevel: '',
-      frustration: ''
-    });
-    setEmail('');
-    
-    // Show success message immediately
-    setShowSuccessModal(true);
-    
-    // Send data to Google Sheets in the background (fire and forget)
     try {
+      // Show loading state
+      setShowQuestionnaireModal(false);
+      setShowLoadingMessage(true);
+      
+      // Add timeout to prevent hanging
+      const timeoutId = setTimeout(() => {
+        setShowLoadingMessage(false);
+        setShowQuestionnaireModal(true);
+        alert('Request timed out. Please try again.');
+      }, 15000); // 15 second timeout
+      
       // Prepare the data to send to Google Sheets
       console.log('Sending data to Google Sheets:', signupData);
 
@@ -437,7 +492,7 @@ function App() {
       formData.append('painLevel', signupData.painLevel);
       formData.append('frustration', signupData.frustration);
 
-      const response = await fetch('https://script.google.com/macros/s/AKfycbwSP01NIVrsj-5ZDBXTh1Yc1GvJHIVNAUW2uC3i1wdDFZsQ29gr1RbiKtxt1DT6FB9F0w/exec', {
+      const response = await fetch(config.GOOGLE_SCRIPT_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -445,16 +500,39 @@ function App() {
         body: formData
       });
 
+      // Clear timeout since we got a response
+      clearTimeout(timeoutId);
+
       if (response.ok) {
         const result = await response.json();
         console.log('Data saved to Google Sheets successfully:', result);
+        
+        // Only show success after confirming data was saved
+        setShowLoadingMessage(false);
+        setShowSuccessModal(true);
+        
+        // Reset state after successful save
+        setCurrentQuestion(0);
+        setAnswers({
+          resumesPerRole: '',
+          jobRolesPerMonth: '',
+          painLevel: '',
+          frustration: ''
+        });
+        setEmail('');
       } else {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
       
     } catch (error) {
       console.error('Error saving to Google Sheets:', error);
-      // Don't show error to user since we already showed success message
+      
+      // Show error state and allow retry
+      setShowLoadingMessage(false);
+      setShowQuestionnaireModal(true);
+      
+      // You could add a toast notification here for better UX
+      alert('Failed to save your responses. Please try again.');
     }
   };
 
@@ -488,7 +566,7 @@ function App() {
                   type="submit"
                   className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
                 >
-                  Continue
+                  Join
                 </button>
                 <button
                   type="button"
@@ -499,6 +577,51 @@ function App() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Loading Message Modal */}
+      {showLoadingMessage && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full text-center">
+            <div className="w-16 h-16 mx-auto mb-6">
+              {/* Loading Spinner Animation */}
+              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+              {showQuestionnaireModal ? 'Saving Your Responses' : 'Saving Your Information'}
+            </h3>
+            <p className="text-gray-600 mb-6">
+              {showQuestionnaireModal 
+                ? 'Please wait while we securely save your questionnaire responses...'
+                : 'Please wait while we securely save your email to our waitlist...'
+              }
+            </p>
+            <div className="flex items-center justify-center space-x-2">
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Thank You Message Modal */}
+      {showThankYouMessage && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full text-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <span className="text-3xl">✅</span>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Thanks for joining!</h3>
+            <p className="text-gray-600 mb-6 leading-relaxed">
+              To help shape the product, could you answer 4 quick questions?
+            </p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-blue-800 font-semibold">🎁 Early Access Bonus Secured</p>
+              <p className="text-blue-700 text-sm mt-1">You're guaranteed 50% off your first 3 months</p>
+            </div>
           </div>
         </div>
       )}
@@ -625,10 +748,6 @@ function App() {
             >
               Join the Early Access Waitlist
             </button>
-            <div className="flex items-center space-x-3 text-base font-medium text-gray-700 bg-green-50 px-4 py-2 rounded-lg border border-green-200">
-              <span className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
-              <span>30+ recruiters already joined</span>
-            </div>
                          <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg px-6 py-4 text-center">
                <div className="flex items-center justify-center space-x-2 mb-1">
                  <span className="text-2xl">🎁</span>

@@ -1,5 +1,13 @@
 // Google Apps Script for handling sign-up data
 // This script creates a web app that can be called from your React app
+// 
+// IMPORTANT: The web app URL is now stored in config.js
+// Current URL: https://script.google.com/macros/s/AKfycbwSP01NIVrsj-5ZDBXTh1Yc1GvJHIVNAUW2uC3i1wdDFZsQ29gr1RbiKtxt1DT6FB9F0w/exec
+// 
+// To update the URL:
+// 1. Update the URL in config.js
+// 2. Deploy the new version of this Google Apps Script
+// 3. Copy the new web app URL and update config.js again
 
 function doPost(e) {
   try {
@@ -56,42 +64,90 @@ function doPost(e) {
       console.log('Headers created successfully');
     }
     
-    // Prepare the row data
-    const timestamp = new Date().toISOString();
-    const rowData = [
-      timestamp,
-      data.email || '',
-      data.resumesPerRole || '',
-      data.jobRolesPerMonth || '',
-      data.painLevel || '',
-      data.frustration || ''
-    ];
+    // Check if email already exists in the sheet
+    const emailColumn = 2; // Column B (Email)
+    let existingRow = -1;
     
-    console.log('Prepared row data:', rowData);
+    // Only check for existing emails if there are data rows (more than just headers)
+    if (sheet.getLastRow() > 1) {
+      const emailRange = sheet.getRange(2, emailColumn, sheet.getLastRow() - 1, 1); // Skip header row
+      const emailValues = emailRange.getValues();
+      
+      for (let i = 0; i < emailValues.length; i++) {
+        if (emailValues[i][0] === data.email) {
+          existingRow = i + 2; // +2 because we start from row 2 and i is 0-based
+          break;
+        }
+      }
+    }
     
-    // Add the data to the next available row
-    const nextRow = sheet.getLastRow() + 1;
-    console.log('Adding data to row:', nextRow);
-    sheet.getRange(nextRow, 1, 1, 6).setValues([rowData]);
-    console.log('Data added successfully');
-    
-    // Auto-resize columns for better readability
-    sheet.autoResizeColumns(1, 6);
-    console.log('Columns auto-resized');
-    
-    // Force spreadsheet refresh to ensure data is saved
-    SpreadsheetApp.flush();
-    console.log('Spreadsheet flushed');
-    
-    // Return success response
-    return ContentService
-      .createTextOutput(JSON.stringify({ 
-        success: true, 
-        message: 'Data saved successfully',
-        timestamp: timestamp,
-        row: nextRow
-      }))
-      .setMimeType(ContentService.MimeType.JSON);
+    if (existingRow > 0) {
+      // Email exists, update the existing row
+      console.log('Email found in existing row:', existingRow);
+      
+      // Update only the questionnaire fields (columns 3-6)
+      const updateData = [
+        data.resumesPerRole || '',
+        data.jobRolesPerMonth || '',
+        data.painLevel || '',
+        data.frustration || ''
+      ];
+      
+      sheet.getRange(existingRow, 3, 1, 4).setValues([updateData]);
+      console.log('Updated existing row with questionnaire data');
+      
+      // Return success response for update
+      return ContentService
+        .createTextOutput(JSON.stringify({ 
+          success: true, 
+          message: 'Questionnaire data updated successfully',
+          action: 'updated',
+          row: existingRow
+        }))
+        .setMimeType(ContentService.MimeType.JSON);
+        
+    } else {
+      // Email doesn't exist, create new row
+      console.log('Creating new row for email:', data.email);
+      
+      // Prepare the row data
+      const timestamp = new Date().toISOString();
+      const rowData = [
+        timestamp,
+        data.email || '',
+        data.resumesPerRole || '',
+        data.jobRolesPerMonth || '',
+        data.painLevel || '',
+        data.frustration || ''
+      ];
+      
+      console.log('Prepared row data:', rowData);
+      
+      // Add the data to the next available row
+      const nextRow = sheet.getLastRow() + 1;
+      console.log('Adding data to row:', nextRow);
+      sheet.getRange(nextRow, 1, 1, 6).setValues([rowData]);
+      console.log('Data added successfully');
+      
+      // Auto-resize columns for better readability
+      sheet.autoResizeColumns(1, 6);
+      console.log('Columns auto-resized');
+      
+      // Force spreadsheet refresh to ensure data is saved
+      SpreadsheetApp.flush();
+      console.log('Spreadsheet flushed');
+      
+      // Return success response for new entry
+      return ContentService
+        .createTextOutput(JSON.stringify({ 
+          success: true, 
+          message: 'Data saved successfully',
+          action: 'created',
+          timestamp: timestamp,
+          row: nextRow
+        }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
       
   } catch (error) {
     // Return error response
